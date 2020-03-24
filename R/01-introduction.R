@@ -63,6 +63,6 @@ dev.off()
 ## ----'quick_intro_05', eval = FALSE----------------------------------------------------------------------------------
 ## # Interactive visualization
 
-# This makes the map interactive, showing little notes
+# This makes the map interactive, showing little notes when passing the cursor over
 p <- scater::plotUMAP(sce, colour_by = "clusters")
 plotly::ggplotly(p)
