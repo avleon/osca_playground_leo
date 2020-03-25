@@ -303,10 +303,61 @@ sort(tapply(rowData(sce)$mean, rowData(sce)$chromosome, base::mean), decreasing 
 
 
 
+## ---------Excersice Day 2----------------------------------------------------------------------------------------------------
+
+# To read the table from the internet
+## I'm using 'stringAsFactors = FALSE' to keep strings as strings, or I could use 'as.is = TRUE'
+
+data <- read.delim("https://tools.thermofisher.com/content/sfs/manuals/cms_095046.txt",
+                   header=TRUE,
+                   sep="\t",
+                   stringsAsFactors = FALSE)
+head(data)
+
+dim(data)
+dim(sce) # 192 cells
+dim(altExp(sce, 'ERCC')) # 92 ERCC sequences
+
+head(rownames(data))
+head(rownames(altExp(sce, 'ERCC')))
+
+# Before matching, assing x and y
+x <- rownames(altExp(sce, 'ERCC'))
+
+y <- data$ERCC.ID
+
+# Match x and y
+object <- match(x,y)
+
+## Check if it worked - all should be FALSE
+table(is.na(object))
+### To make check it automatically
+if(!all(!is.na(object))) {
+    stop("Hay al menos un NA")
+    }
+
+# Re-order the data
+data <- data[object, ]
+
+# To check it worked
+identical(rownames(altExp(sce, "ERCC")), data$ERCC.ID)
+
+# Normalize the ERCC counts
+# altExp(sce, "ERCC") <- scater::logNormCounts(altExp(sce, "ERCC"))
+
+i <- 1
+plot(
+        data[, "concentration in Mix 1 (attomoles/ul)"] ~
+            counts(altExp(sce, "ERCC"))[, i]
+        )
+plot(data[, "concentration in Mix 1 (attomoles/ul)"] ~
+         counts(altExp(sce, "ERCC"))[, i]
+         xlab
 
 
+)
 
-## ----ercc_exercise, cache = TRUE, dependson='all_code'---------------------------------------------------------------
+## ----DAY 2. ercc_exercise, cache = TRUE, dependson='all_code'---------------------------------------------------------------
 ## Read the data from the web
 ercc_info <-
     read.delim(
@@ -341,6 +392,7 @@ for (i in seq_len(2)) {
     )
     abline(0, 1, lty = 2, col = 'red')
 }
+
 
 
 ## ----all_code_part2, cache=TRUE--------------------------------------------------------------------------------------
