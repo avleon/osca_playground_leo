@@ -350,9 +350,16 @@ plot(
 abline(h = attr(discard.mito, "thresholds")["higher"], col = "red")
 
 ## ------------------------------- Exercise Day 3 -----------------------------------------------------------------------
+
 # Why does emptyDrops() return NA values?
-## The NA values are the droplets that do NOT meet the limit (that is, values that are below the lower limit, in this case is 100),
-## so this droplets are not considered for further statistic analysis. Or, they are empty values.
+## The NA values are the droplets that do NOT meet the limit (that is, values that are below the lower limit, in this case is 100), so this droplets are not considered for further statistic analysis. Or, they are empty values.
+## Here, below lower & test.ambient = FALSE
+## 0 "total" (even with test.ambient = TRUE)
+
+with(all.out, table(
+    'NA pvalue' = is.na(PValue),
+    'Total is 0?' = Total == 0
+))
 
 with(all.out, table('NA pvalue' = is.na(PValue), 'Total is 0?' = Total == 0))
 
@@ -364,6 +371,8 @@ identical(all.out$PValue, e.out$PValue)
 
 # What if you subset to the non-NA entries?
 ## Then, yes.
+
+identical(e.out$PValue[!is.na(all.out$FDR)], all.out$PValue[!is.na(all.out$FDR)])
 
 ### False
 identical(
