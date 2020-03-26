@@ -4,3 +4,87 @@
 
 ## Notes
 
+## ----all_code, cache=TRUE--------------------------------------------------------------------------------------------
+library('scRNAseq')
+sce.zeisel <- ZeiselBrainData(ensembl = TRUE)
+
+# Quality control
+library('scater')
+is.mito <- which(rowData(sce.zeisel)$featureType == "mito")
+stats <- perCellQCMetrics(sce.zeisel, subsets = list(Mt = is.mito))
+qc <-
+    quickPerCellQC(stats,
+                   percent_subsets = c("altexps_ERCC_percent", "subsets_Mt_percent"))
+sce.zeisel <- sce.zeisel[, !qc$discard]
+
+
+## ----all_code2, cache=TRUE, dependson='all_code'---------------------------------------------------------------------
+# Library size factors
+lib.sf.zeisel <- librarySizeFactors(sce.zeisel)
+
+# Examine distribution of size factors
+summary(lib.sf.zeisel)
+hist(log10(lib.sf.zeisel), xlab = "Log10[Size factor]", col = "grey80")
+ls.zeisel <- colSums(counts(sce.zeisel))
+plot(
+    ls.zeisel,
+    lib.sf.zeisel,
+    log = "xy",
+    xlab = "Library size",
+    ylab = "Size factor"
+)
+
+
+## ----exercise_solution, cache=TRUE, dependson='all_code'-------------------------------------------------------------
+## First compute the sums
+zeisel_sums <- colSums(counts(sce.zeisel))
+identical(zeisel_sums, ls.zeisel)
+
+## Next, make them have unity mean
+zeisel_size_factors <- zeisel_sums/mean(zeisel_sums)
+identical(zeisel_size_factors, lib.sf.zeisel)
+
+
+## ----all_code3, cache=TRUE, dependson='all_code2'--------------------------------------------------------------------
+# Normalization by convolution
+
+library('scran')
+# Pre-clustering
+set.seed(100)
+clust.zeisel <- quickCluster(sce.zeisel)
+# Compute deconvolution size factors
+deconv.sf.zeisel <-
+    calculateSumFactors(sce.zeisel, clusters = clust.zeisel, min.mean = 0.1)
+
+# Examine distribution of size factors
+summary(deconv.sf.zeisel)
+hist(log10(deconv.sf.zeisel), xlab = "Log10[Size factor]",
+     col = "grey80")
+plot(
+    ls.zeisel,
+    deconv.sf.zeisel,
+    log = "xy",
+    xlab = "Library size",
+    ylab = "Size factor"
+)
+
+
+## ----all_code4, cache=TRUE, dependson='all_code3'--------------------------------------------------------------------
+# Library size factors vs. convolution size factors
+
+# Colouring points using the supplied cell-types
+plot(
+    lib.sf.zeisel,
+    deconv.sf.zeisel,
+    xlab = "Library size factor",
+    ylab = "Deconvolution size factor",
+    log = 'xy',
+    pch = 16,
+    col = as.integer(factor(sce.zeisel$level1class))
+)
+abline(a = 0, b = 1, col = "red")
+
+
+## ----'reproducibility', cache = TRUE, dependson=knitr::all_labels()--------------------------------------------------
+options(width = 120)
+sessioninfo::session_info()
