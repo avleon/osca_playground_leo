@@ -201,9 +201,25 @@ discard.ercc2 <- isOutlier(
     sce.grun$altexps_ERCC_percent,
     type = "higher",
     batch = sce.grun$donor,
-    subset = sce.grun$donor %in% c("D17", "D2", "D7")
+    subset = sce.grun$donor %in% c("D17", "D2", "D7") # the 'subset' allows you to choose the donors to work with and set the outlier point based on those donors
 )
 
+# Understanding %in%
+class(sce.grun$donor)
+length(sce.grun$donor)
+dim(sce.grun)
+table(sce.grun$donor)
+
+manual_subset <- sce.grun$donor == 'D17' | sce.grun$donor == 'D2' | sce.grun$donor == 'D7'
+class(manual_subset)
+length(manual_subset)
+sum(manual_subset)
+
+## A way to make this quicker is using %in%
+auto_subset <- sce.grun$donor %in% c('D17', 'D2', 'D7')
+identical(manual_subset, auto_subset)
+
+# Diagnostic plot for each method
 plotColData(
     sce.grun,
     x = "donor",
@@ -217,7 +233,7 @@ plotColData(
     colour_by = data.frame(discard = discard.ercc2)
 )
 
-# Add info about which cells are outliers
+# Add info about which cells are outliers (to the previous example with 'sce.416b')
 sce.416b$discard <- discard2
 
 # Look at this plot for each QC metric
@@ -286,7 +302,11 @@ legend(
     cex = 1.2
 )
 
+dim(sce.pbmc)
 
+## Libraries from 10X Genomics have this particular behaviour (sort of a Z shape line, where we cut right on the inflection point)
+
+# 'emptyDrops' allows you to identify the drops with no cells
 set.seed(100)
 e.out <- emptyDrops(counts(sce.pbmc))
 
