@@ -22,6 +22,11 @@ sce.zeisel <- sce.zeisel[, !qc$discard]
 # Library size factors
 lib.sf.zeisel <- librarySizeFactors(sce.zeisel)
 
+class(lib.sf.zeisel)
+length(lib.sf.zeisel)
+head(lib.sf.zeisel)
+mean(lib.sf.zeisel)
+
 # Examine distribution of size factors
 summary(lib.sf.zeisel)
 hist(log10(lib.sf.zeisel), xlab = "Log10[Size factor]", col = "grey80")
@@ -33,6 +38,28 @@ plot(
     xlab = "Library size",
     ylab = "Size factor"
 )
+
+### ----- Exercise Day 3 -----------------------------------------------------------------------------------------------
+
+# Are ls.zeisel and lib.sf.zeisel identical?
+## No, they are not
+identical(ls.zeisel, lib.sf.zeisel) # FALSE
+
+# Are they proportional?
+# a * b = c
+# a * b / a = c / a
+# a / a * b = c / a
+# 1 * b = c / a
+# b = c / a
+
+prop1 <- lib.sf.zeisel/ls.zeisel
+prop2 <- ls.zeisel/lib.sf.zeisel
+table(prop1/prop2)
+table(prop2/prop1)
+
+# Compute lib.sf.zeisel manually
+
+
 
 
 ## ----exercise_solution, cache=TRUE, dependson='all_code'-------------------------------------------------------------
