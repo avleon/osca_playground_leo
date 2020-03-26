@@ -310,13 +310,21 @@ dim(sce.pbmc)
 set.seed(100)
 e.out <- emptyDrops(counts(sce.pbmc))
 
+head(e.out)
+dim(e.out)
+
 # See ?emptyDrops for an explanation of why there are NA # values.
+## 'emptyDrops' runs MonteCarlo simulations
 summary(e.out$FDR <= 0.001)
 
 set.seed(100)
 limit <- 100
 all.out <-
     emptyDrops(counts(sce.pbmc), lower = limit, test.ambient = TRUE)
+
+head(all.out)
+dim(all.out)
+
 # Ideally, this histogram should look close to uniform.
 # Large peaks near zero indicate that barcodes with total
 # counts below 'lower' are not ambient in origin.
@@ -340,6 +348,32 @@ plot(
     ylab = "Mitochondrial %"
 )
 abline(h = attr(discard.mito, "thresholds")["higher"], col = "red")
+
+## ------------------------------- Exercise Day 3 -----------------------------------------------------------------------
+# Why does emptyDrops() return NA values?
+## The NA values are the droplets that do NOT meet the limit (that is, values that are below the lower limit, in this case is 100),
+## so this droplets are not considered for further statistic analysis. Or, they are empty values.
+
+with(all.out, table('NA pvalue' = is.na(PValue), 'Total is 0?' = Total == 0))
+
+# Are the p-values the same for e.out and all.out?
+## No.
+### If we want to have the same results we need to set the seed to the same value and use it before running the code.
+
+identical(all.out$PValue, e.out$PValue)
+
+# What if you subset to the non-NA entries?
+## Then, yes.
+
+### False
+identical(
+    all.out$PValue[!is.na(e.out$FDR)],
+    e.out$PValue[!is.na(e.out$DRF)]
+)
+
+### True
+with(e.out, table('NA pvalue' = is.na(PValue), 'Total is 0?' = Total == 0))
+
 
 
 ## ----marking, cache=TRUE, dependson='use_case'-----------------------------------------------------------------------
