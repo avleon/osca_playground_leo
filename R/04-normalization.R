@@ -54,22 +54,19 @@ identical(ls.zeisel, lib.sf.zeisel) # FALSE
 
 prop1 <- lib.sf.zeisel/ls.zeisel
 prop2 <- ls.zeisel/lib.sf.zeisel
-table(prop1/prop2)
-table(prop2/prop1)
+table(prop1)
+table(prop2)
 
 # Compute lib.sf.zeisel manually
-
-
-
-
-## ----exercise_solution, cache=TRUE, dependson='all_code'-------------------------------------------------------------
-## First compute the sums
+## First we need to compute the sums
 zeisel_sums <- colSums(counts(sce.zeisel))
 identical(zeisel_sums, ls.zeisel)
 
 ## Next, make them have unity mean
+mean(zeisel_sums)
 zeisel_size_factors <- zeisel_sums/mean(zeisel_sums)
 identical(zeisel_size_factors, lib.sf.zeisel)
+
 
 
 ## ----all_code3, cache=TRUE, dependson='all_code2'--------------------------------------------------------------------
