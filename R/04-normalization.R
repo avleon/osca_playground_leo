@@ -80,8 +80,16 @@ clust.zeisel <- quickCluster(sce.zeisel)
 deconv.sf.zeisel <-
     calculateSumFactors(sce.zeisel, clusters = clust.zeisel, min.mean = 0.1)
 
+table(clust.zeisel)
+class(deconv.sf.zeisel)
+length(deconv.sf.zeisel)
+
+
 # Examine distribution of size factors
 summary(deconv.sf.zeisel)
+
+# Now we plot the distribution
+pdf("deconv.sf.zeisel.pdf") # to be able to visualize the plot working from the cluster
 hist(log10(deconv.sf.zeisel), xlab = "Log10[Size factor]",
      col = "grey80")
 plot(
@@ -91,12 +99,42 @@ plot(
     xlab = "Library size",
     ylab = "Size factor"
 )
+dev.off()
+
+
+## ---------------- Exercise Day 4 ----------------------------------------------
+# How many quick clusters did we get?
+## We got 12
+table(clust.zeisel)
+
+# How many cells per quick cluster did we get?
+## From 113 to 325 cells
+summary(clust.zeisel)
+## We can also get more information if we sort and make a vector
+data.clust.zeisel <- table(clust.zeisel)
+sort(data.clust.zeisel)
+summary(as.vector(data.clust.zeisel))
+
+# How many quick clusters will we get if we set the minimum size to 200? Use 100 as the seed.
+## We got 10
+
+set.seed(100)
+clust.zeisel.2 <- quickCluster(sce.zeisel, min.size = 200)
+
+deconv.sf.zeisel.2 <-
+    calculateSumFactors(sce.zeisel, clusters = clust.zeisel, min.mean = 0.1)
+
+table(clust.zeisel.2)
+
+# How many lines do you see?
+## Something like 2 lines
 
 
 ## ----all_code4, cache=TRUE, dependson='all_code3'--------------------------------------------------------------------
 # Library size factors vs. convolution size factors
 
 # Colouring points using the supplied cell-types
+pdf("color.zeisel.pdf")
 plot(
     lib.sf.zeisel,
     deconv.sf.zeisel,
@@ -107,6 +145,22 @@ plot(
     col = as.integer(factor(sce.zeisel$level1class))
 )
 abline(a = 0, b = 1, col = "red")
+dev.off()
+
+# Cells are separating in groups by cell type-specific deviations
+table(sce.zeisel$level1class)
+
+# Scaling and log-transforming
+# Using the convolution size factor we computed earlier
+
+sce.zeisel <- logNormCounts(sce.zeisel)
+
+# The above added a "Logcounts" assay to the SCE
+assayNames(sce.zeisel)
+
+### This divides the count for each feature by the appropiate size factor for that cell (normalized values)
+### From this point on, we will use lognormcounts for the downstream analysis
+## the log-transformation results in differences in the log-values representing the log-fold changes in expression
 
 
 ## ----'reproducibility', cache = TRUE, dependson=knitr::all_labels()--------------------------------------------------
